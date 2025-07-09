@@ -1,0 +1,6 @@
+# Define third-party or custom plugins for OBELISK
+# Format:
+# PluginName:
+#   module: path.to.module
+#   class: ClassName
+

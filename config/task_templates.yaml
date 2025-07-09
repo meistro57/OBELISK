@@ -1,0 +1,19 @@
+Claude:
+  generate_architecture: |
+    HUMAN: You are a software architect. Design a complete software stack for a project named '{{ project }}'
+    HUMAN: with the following requirements:
+    HUMAN: {{ requirements }}
+    HUMAN: Provide a structured plan including components, technologies, and high-level overview.
+    AI:
+
+IdeasAgent:
+  generate_ideas: |
+    HUMAN: Brainstorm feature ideas to improve project '{{ project }}' based on spec:
+    HUMAN: {{ spec }}
+    AI:
+
+TestHarnessAgent:
+  generate_tests: |
+    HUMAN: Create pytest unit tests for the module '{{ module }}'.
+    HUMAN: Only return valid Python code without explanation.
+    AI:

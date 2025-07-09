@@ -1,0 +1,21 @@
+CodeArchitect:
+  module: agent_system.agents.code_architect
+  class: CodeArchitect
+IdeasAgent:
+  module: agent_system.agents.ideas_agent
+  class: IdeasAgent
+CreativityAgent:
+  module: agent_system.agents.creativity_agent
+  class: CreativityAgent
+QCChecker:
+  module: agent_system.agents.qc_checker
+  class: QCChecker
+TestHarnessAgent:
+  module: agent_system.agents.test_harness_agent
+  class: TestHarnessAgent
+SelfScoringAgent:
+  module: agent_system.agents.self_scoring_agent
+  class: SelfScoringAgent
+MetaAgent:
+  module: agent_system.agents.meta_agent
+  class: MetaAgent
