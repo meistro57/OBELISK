@@ -1,3 +1,5 @@
+![image](https://github.com/user-attachments/assets/f294f26c-a84f-48c1-b6f1-bee1d9a538e2)
+
 # OBELISK
 A modular multi-agent system that fuses Claude, Codex, and ChatGPT into a collaborative intelligence engine. OBELISK is the sacred architecture of thought—planning, building, and refining code from idea to execution.
 
