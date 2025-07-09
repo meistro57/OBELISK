@@ -1,7 +1,9 @@
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from pydantic import BaseModel
-from typing import Dict, Any, Set
 import os
+import subprocess
+from typing import Any, Dict, Set
+
+from fastapi import FastAPI, WebSocket
+from pydantic import BaseModel
 
 from agent_system.agent_registry import AgentRegistry
 from agent_system.memory import Memory
@@ -15,26 +17,34 @@ import logging
 # WebSocket log broadcaster
 log_subscribers: Set[WebSocket] = set()
 
+
 class BroadcastHandler(logging.Handler):
     """Logging handler that broadcasts log messages to all WebSocket clients."""
+
     def emit(self, record):
         message = self.format(record)
         for ws in list(log_subscribers):
             try:
                 import asyncio
+
                 asyncio.create_task(ws.send_text(message))
             except Exception:
                 continue
 
+
 # Attach broadcast handler to root logger
 root_logger = logging.getLogger()
 handler = BroadcastHandler()
-handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+handler.setFormatter(
+    logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+)
 root_logger.addHandler(handler)
+
 
 class TaskRequest(BaseModel):
     agent: str
     params: Dict[str, Any] = {}
+
 
 class TaskStatus(BaseModel):
     id: str
@@ -48,13 +58,22 @@ async def create_task(req: TaskRequest):
     """
     Enqueue an agent task via Celery; returns a task ID immediately.
     """
-    async_result = celery_app.send_task("service.api.process_task", args=[req.agent, req.params])
+    async_result = celery_app.send_task(
+        "service.api.process_task", args=[req.agent, req.params]
+    )
     import json
-    memory.add("TaskRegistry", "enqueue", json.dumps({
-        "id": async_result.id,
-        "agent": req.agent,
-        "params": req.params,
-    }))
+
+    memory.add(
+        "TaskRegistry",
+        "enqueue",
+        json.dumps(
+            {
+                "id": async_result.id,
+                "agent": req.agent,
+                "params": req.params,
+            }
+        ),
+    )
     return TaskStatus(id=async_result.id, agent=req.agent, status=async_result.status)
 
 
@@ -67,20 +86,21 @@ def process_task(task_id: str):
         return
     try:
         agent = registry.get_agent(entry.agent, **(entry.params or {}))
-        if hasattr(agent, 'generate_architecture'):
+        if hasattr(agent, "generate_architecture"):
             res = agent.generate_architecture(**entry.params)
-        elif hasattr(agent, 'generate_ideas'):
+        elif hasattr(agent, "generate_ideas"):
             res = agent.generate_ideas(**entry.params)
         else:
             res = str(agent)
-        entry.status = 'completed'
+        entry.status = "completed"
         entry.result = str(res)
-        memory.add(entry.agent, 'task', entry.result)
+        memory.add(entry.agent, "task", entry.result)
     except Exception as e:
-        entry.status = 'failed'
+        entry.status = "failed"
         entry.result = str(e)
     db.commit()
     db.close()
+
 
 @app.get("/tasks/{task_id}", response_model=TaskStatus)
 async def get_task(task_id: str):
@@ -92,8 +112,9 @@ async def get_task(task_id: str):
         id=res.id,
         agent=res.task_name or "",
         status=res.status,
-        result=res.result if res.status == 'SUCCESS' else None,
+        result=res.result if res.status == "SUCCESS" else None,
     )
+
 
 @app.get("/memory/{agent_name}")
 async def get_memory(agent_name: str, limit: int = 20):
@@ -104,12 +125,14 @@ async def get_memory(agent_name: str, limit: int = 20):
         for e in entries
     ]
 
+
 @app.get("/tasks_all", response_model=Dict[str, TaskStatus])
 async def list_tasks_all(limit: int = 50):
     """
     List recent tasks that were enqueued (via TaskRegistry) and their status/results.
     """
     import json
+
     logs = memory.query(agent="TaskRegistry", limit=limit)
     out: Dict[str, TaskStatus] = {}
     for e in logs:
@@ -119,6 +142,35 @@ async def list_tasks_all(limit: int = 50):
             id=res.id,
             agent=rec.get("agent", ""),
             status=res.status,
-            result=res.result if res.status == 'SUCCESS' else None,
+            result=res.result if res.status == "SUCCESS" else None,
         )
     return out
+
+
+@app.get("/healthz")
+async def health_check():
+    """Simple health check endpoint."""
+    return {"status": "ok"}
+
+
+@app.get("/version")
+async def version() -> Dict[str, str]:
+    """Return the current git commit hash for the running service."""
+    commit = os.getenv("GIT_COMMIT")
+    if not commit:
+        try:
+            commit = (
+                subprocess.check_output(
+                    [
+                        "git",
+                        "rev-parse",
+                        "--short",
+                        "HEAD",
+                    ]
+                )
+                .decode()
+                .strip()
+            )
+        except Exception:
+            commit = "unknown"
+    return {"commit": commit}

@@ -17,8 +17,13 @@ This project defines an agent system that automates creating complete software s
    ```bash
    pip install -r requirements.txt
    ```
-3. Copy `.env.example` to `.env` and populate with your API keys, Codex CLI path, and LLAMA_MODEL_PATH.
-4. (Optional) Run the LLaMA setup script to download and configure a base model:
+3. Install and run `pre-commit` hooks:
+   ```bash
+   pip install pre-commit
+   pre-commit install
+   ```
+4. Copy `.env.example` to `.env` and populate with your API keys, Codex CLI path, and LLAMA_MODEL_PATH.
+5. (Optional) Run the LLaMA setup script to download and configure a base model:
    ```bash
    scripts/setup_llama.py --model decapoda-research/llama-7b-hf --dest ./models/llama
    ```
@@ -117,6 +122,8 @@ Endpoints:
 - `POST /tasks` to enqueue an agent task (specify `agent` and `params` JSON); returns a task ID immediately.
 - `GET /tasks/{id}` to check status/result.
 - `GET /memory/{agent_name}` to retrieve recent memory entries.
+- `GET /healthz` for a simple health check.
+- `GET /version` to retrieve the running commit hash.
 
 ## Prompt Chaining & Reasoning Logs
 
