@@ -20,6 +20,16 @@ celery -A service.celery_app.celery_app beat --loglevel=info &
 BEAT_PID=$!
 
 echo "Starting Frontend..."
+if ! command -v npm >/dev/null 2>&1; then
+  echo "npm is not installed. Please install Node.js and npm to run the frontend." >&2
+  exit 1
+fi
+
+if [ ! -d web/node_modules ]; then
+  echo "Installing frontend dependencies..."
+  (cd web && npm install)
+fi
+
 cd web && npm run dev &
 FRONTEND_PID=$!
 

@@ -84,6 +84,8 @@ Browse to http://localhost:5174 to access the React-based dashboard. The dashboa
 ```bash
 cd web && npm install && npm run dev
 ```
+Ensure you have Node.js and npm installed. The `start_all.sh` script will
+automatically install these dependencies if `node_modules` is missing.
 
 ### Unified Startup Script
 
@@ -93,8 +95,9 @@ chmod +x start_all.sh
 ./start_all.sh
 ```
 
-This will launch the API, Celery worker, Celery beat scheduler, and the React dashboard,
-automatically open your browser to `http://localhost:5174`, and stream logs via WebSocket.
+This will launch the API, Celery worker, Celery beat scheduler, and the React dashboard.
+If Node dependencies are missing, the script installs them automatically before starting Vite.
+Your browser will open to `http://localhost:5174` and logs will stream via WebSocket.
 
 ### Running Celery Worker
 
