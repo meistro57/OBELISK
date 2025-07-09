@@ -1,0 +1,13 @@
+huggingface_hub>=0.13.0
+python-dotenv>=0.20.0
+PyYAML>=6.0
+Jinja2>=3.0
+faiss-cpu>=1.7.3.post2
+fastapi>=0.95.0
+uvicorn[standard]>=0.23.0
+anthropic>=0.0.1
+openai>=0.27.0
+SQLAlchemy>=1.4
+psycopg2-binary>=2.9
+celery>=5.3.0
+redis>=4.5.0

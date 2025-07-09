@@ -1,0 +1,75 @@
+{
+  "system": "MAX POWER MULTI-AGENT AI",
+  "description": "An elite-level agent orchestration system combining Claude, Codex, and ChatGPT into a unified, self-improving intelligence hub.",
+  "core_features": [
+    "Modular agent architecture with role-based specializations",
+    "Dynamic task router based on task type and model strengths",
+    "YAML task definitions and structured prompt templates",
+    "Long-term memory with SQL and vector store integration",
+    "Multi-agent orchestration with fallback and voting logic",
+    "Prompt chaining, inter-agent messaging, and reasoning logs"
+  ],
+  "agents": [
+    {
+      "name": "Claude",
+      "role": "System Architect / Planner",
+      "strengths": ["Decomposition", "Pseudocode", "Safety-aware logic", "Conceptual clarity"]
+    },
+    {
+      "name": "Codex (GPT-4o)",
+      "role": "Code Engineer / Implementer",
+      "strengths": ["Precise code generation", "APIs", "Structured logic", "DevOps"]
+    },
+    {
+      "name": "Eli (ChatGPT)",
+      "role": "Synthesizer / Explainer / Coordinator",
+      "strengths": ["Final output polish", "Testing", "Humor", "Documentation", "Meta-reasoning"]
+    }
+  ],
+  "modules": {
+    "memory": {
+      "relational": "MySQL or PostgreSQL",
+      "vector": "FAISS, Chroma, or similar",
+      "features": ["Context recall", "RAG support", "Agent preference memory"]
+    },
+    "prompt_system": {
+      "templates": "Model-specific and role-tuned",
+      "optimizer": "Self-refining prompt engine",
+      "fallbacks": "Retry + self-prompting mechanism"
+    },
+    "execution": {
+      "sandbox": "Subprocess or Docker container",
+      "testing": ["Pytest auto-generator", "Code coverage", "Auto-repair on failure"],
+      "validation": ["Pylint", "Black", "Token/cost scoring"]
+    },
+    "interface": {
+      "cli": "Natural-language driven terminal interface",
+      "web": "FastAPI/Flask backend with React/Svelte dashboard",
+      "features": ["Task queue", "Log viewer", "Memory browser", "Graph visualization"]
+    },
+    "intelligence": {
+      "meta_agent": true,
+      "self_improvement": true,
+      "agent_scoring": true,
+      "collaboration": "Inter-agent feedback and prompt handoffs",
+      "personality_profiles": true
+    },
+    "extensibility": {
+      "plugin_api": true,
+      "model_agnostic": true,
+      "offline_support": true,
+      "voice_control": true
+    }
+  },
+  "advanced_capabilities": [
+    "Autonomous mission planner with milestone breakdowns",
+    "Code review and diffing between agents",
+    "Thought chain visualization",
+    "Auto-documentation and README generation",
+    "Real-time feedback injection during runs",
+    "Git + Docker integration for deployable builds",
+    "Forkable task states via time-travel debugger"
+  ],
+  "vision": "This is not just a dev assistant. This is a trans-model, self-adaptive, multi-agent operating system designed to build, reason, test, and evolve software from idea to completion autonomously with a human-friendly interface and long-term memory.",
+  "codename": "THE AGENCY – MAX POWER EDITION"
+}
