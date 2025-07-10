@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 from typing import Any, Dict, Set
@@ -9,10 +10,11 @@ from agent_system.agent_registry import AgentRegistry
 from agent_system.memory import Memory
 from service.celery_app import celery_app
 
+api_logger = logging.getLogger(__name__)
+
 app = FastAPI(title="OBELISK API")
 registry = AgentRegistry()
 memory = Memory()
-import logging
 
 # WebSocket log broadcaster
 log_subscribers: Set[WebSocket] = set()
@@ -78,28 +80,21 @@ async def create_task(req: TaskRequest):
 
 
 @celery_app.task(name="service.api.process_task")
-def process_task(task_id: str):
-    db = SessionLocal()
-    entry = db.query(TaskEntry).get(task_id)
-    if not entry:
-        db.close()
-        return
+def process_task(agent_name: str, params: Dict[str, Any]):
+    """Execute an agent task and store the result in memory."""
     try:
-        agent = registry.get_agent(entry.agent, **(entry.params or {}))
+        agent = registry.get_agent(agent_name, **(params or {}))
         if hasattr(agent, "generate_architecture"):
-            res = agent.generate_architecture(**entry.params)
+            res = agent.generate_architecture(**params)
         elif hasattr(agent, "generate_ideas"):
-            res = agent.generate_ideas(**entry.params)
+            res = agent.generate_ideas(**params)
         else:
             res = str(agent)
-        entry.status = "completed"
-        entry.result = str(res)
-        memory.add(entry.agent, "task", entry.result)
-    except Exception as e:
-        entry.status = "failed"
-        entry.result = str(e)
-    db.commit()
-    db.close()
+        memory.add(agent_name, "task", str(res))
+        return res
+    except Exception as e:  # pragma: no cover - just log
+        memory.add(agent_name, "error", str(e))
+        raise
 
 
 @app.get("/tasks/{task_id}", response_model=TaskStatus)
