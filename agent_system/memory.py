@@ -1,5 +1,5 @@
 import os
-import sqlite3
+from typing import Optional
 
 
 class Memory:
@@ -7,40 +7,43 @@ class Memory:
     Memory store for agent interactions. Uses SQLAlchemy if RELATIONAL_DSN is set,
     otherwise falls back to SQLite.
     """
-    def __init__(self, db_path: str = None):
-        from sqlalchemy import Column, Integer, String, Text, DateTime, create_engine, inspect, text
+
+    def __init__(self, db_path: Optional[str] = None):
+        from sqlalchemy import (Column, DateTime, Integer, String, Text,
+                                create_engine, inspect, text)
         from sqlalchemy.ext.declarative import declarative_base
         from sqlalchemy.orm import sessionmaker
 
         Base = declarative_base()
 
-        class MemoryEntry(Base):
-            __tablename__ = 'memories'
+        class MemoryEntry(Base):  # type: ignore[misc, valid-type]
+            __tablename__ = "memories"
             id = Column(Integer, primary_key=True, autoincrement=True)
-            timestamp = Column(DateTime, server_default="CURRENT_TIMESTAMP")
+            # use SQL expression for current timestamp to avoid quoting issues
+            timestamp = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
             project = Column(String(100), nullable=True)
             agent = Column(String(100))
             action = Column(String(100))
             content = Column(Text)
 
-        dsn = os.getenv('RELATIONAL_DSN')
+        dsn = os.getenv("RELATIONAL_DSN")
         if dsn:
             engine = create_engine(dsn)
         else:
-            sqlite_path = db_path or os.getenv('MEMORY_DB_PATH', './memory.sqlite')
-            engine = create_engine(f'sqlite:///{sqlite_path}')
+            sqlite_path = db_path or os.getenv("MEMORY_DB_PATH", "./memory.sqlite")
+            engine = create_engine(f"sqlite:///{sqlite_path}")
 
         Base.metadata.create_all(engine)
         # ensure project column exists for legacy databases
         insp = inspect(engine)
         try:
-            cols = [c['name'] for c in insp.get_columns('memories')]
+            cols = [c["name"] for c in insp.get_columns("memories")]
         except Exception:
             cols = []
-        if 'project' not in cols:
+        if "project" not in cols:
             try:
                 with engine.begin() as conn:
-                    conn.execute(text('ALTER TABLE memories ADD COLUMN project TEXT'))
+                    conn.execute(text("ALTER TABLE memories ADD COLUMN project TEXT"))
             except Exception:
                 pass
         self.Session = sessionmaker(bind=engine)
@@ -61,17 +64,26 @@ class Memory:
         )
         self.conn.commit()
 
-    def add(self, agent: str, action: str, content: str, project: str = None):
+    def add(
+        self, agent: str, action: str, content: str, project: Optional[str] = None
+    ) -> None:
         """
         Add a memory entry for a given agent and action with arbitrary content.
         """
         session = self.Session()
-        entry = self._MemoryEntry(project=project, agent=agent, action=action, content=content)
+        entry = self._MemoryEntry(
+            project=project, agent=agent, action=action, content=content
+        )
         session.add(entry)
         session.commit()
         session.close()
 
-    def query(self, agent: str = None, project: str = None, limit: int = 100):
+    def query(
+        self,
+        agent: Optional[str] = None,
+        project: Optional[str] = None,
+        limit: int = 100,
+    ):
         """
         Retrieve recent memory entries, optionally filtered by agent.
         Returns a list of MemoryEntry objects.
