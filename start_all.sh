@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -e
 
+# Ensure Redis is running for Celery
+if command -v redis-cli >/dev/null 2>&1; then
+  if ! redis-cli ping >/dev/null 2>&1; then
+    echo "Starting Redis..."
+    redis-server --daemonize yes
+    # Give Redis a moment to spin up
+    sleep 1
+  fi
+else
+  echo "Redis is required but not installed. Please install redis-server." >&2
+  exit 1
+fi
+
 # Activate venv if exists
 if [ -f .venv/bin/activate ]; then
   source .venv/bin/activate
