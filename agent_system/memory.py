@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from typing import Optional
 
 
@@ -10,7 +11,7 @@ class Memory:
 
     def __init__(self, db_path: Optional[str] = None):
         from sqlalchemy import (Column, DateTime, Integer, String, Text,
-                                create_engine, inspect, text)
+                                create_engine, func, inspect, text)
         from sqlalchemy.ext.declarative import declarative_base
         from sqlalchemy.orm import sessionmaker
 
@@ -19,8 +20,8 @@ class Memory:
         class MemoryEntry(Base):  # type: ignore[misc, valid-type]
             __tablename__ = "memories"
             id = Column(Integer, primary_key=True, autoincrement=True)
-            # use SQL expression for current timestamp to avoid quoting issues
-            timestamp = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+            # ensure correct timestamp generation without quoting issues
+            timestamp = Column(DateTime, server_default=func.now())
             project = Column(String(100), nullable=True)
             agent = Column(String(100))
             action = Column(String(100))
@@ -72,7 +73,11 @@ class Memory:
         """
         session = self.Session()
         entry = self._MemoryEntry(
-            project=project, agent=agent, action=action, content=content
+            project=project,
+            agent=agent,
+            action=action,
+            content=content,
+            timestamp=datetime.utcnow(),
         )
         session.add(entry)
         session.commit()
