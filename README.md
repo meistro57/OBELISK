@@ -84,7 +84,6 @@ uvicorn service.api:app --reload
 Browse to http://localhost:5174 to access the React-based dashboard. The dashboard now supports:
 - Submitting tasks and viewing live status/results
 - Refreshable Task History table via `/tasks_all`
-- Real-time log streaming via WebSocket at `/ws/logs`
 
 ```bash
 cd web && npm install && npm run dev
@@ -110,7 +109,7 @@ chmod +x start_all.sh
 
 This will launch the API, Celery worker, Celery beat scheduler, and the React dashboard.
 If Node dependencies are missing, the script installs them automatically before starting Vite.
-Your browser will open to `http://localhost:5174` and logs will stream via WebSocket.
+Your browser will open to `http://localhost:5174`.
 
 ### Running Celery Worker
 
