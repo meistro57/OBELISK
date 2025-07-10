@@ -8,7 +8,7 @@ class Memory:
     otherwise falls back to SQLite.
     """
     def __init__(self, db_path: str = None):
-        from sqlalchemy import Column, Integer, String, Text, DateTime, create_engine
+        from sqlalchemy import Column, Integer, String, Text, DateTime, create_engine, inspect, text
         from sqlalchemy.ext.declarative import declarative_base
         from sqlalchemy.orm import sessionmaker
 
@@ -31,11 +31,18 @@ class Memory:
             engine = create_engine(f'sqlite:///{sqlite_path}')
 
         Base.metadata.create_all(engine)
-        # ensure project column exists for legacy tables
+        # ensure project column exists for legacy databases
+        insp = inspect(engine)
         try:
-            engine.execute('ALTER TABLE memories ADD COLUMN project TEXT')
+            cols = [c['name'] for c in insp.get_columns('memories')]
         except Exception:
-            pass
+            cols = []
+        if 'project' not in cols:
+            try:
+                with engine.begin() as conn:
+                    conn.execute(text('ALTER TABLE memories ADD COLUMN project TEXT'))
+            except Exception:
+                pass
         self.Session = sessionmaker(bind=engine)
         self._MemoryEntry = MemoryEntry
 
