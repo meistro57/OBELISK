@@ -1,6 +1,33 @@
 #!/usr/bin/env bash
 set -e
 
+echo "Updating repository..."
+git pull --ff-only
+
+# Install missing system dependencies
+install_packages=()
+
+if ! command -v npm >/dev/null 2>&1; then
+  install_packages+=(nodejs npm)
+fi
+
+if ! command -v redis-server >/dev/null 2>&1; then
+  install_packages+=(redis-server)
+fi
+
+if [ ${#install_packages[@]} -gt 0 ]; then
+  echo "Installing packages: ${install_packages[*]}"
+  if command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update
+    sudo apt-get install -y "${install_packages[@]}"
+  elif command -v brew >/dev/null 2>&1; then
+    brew install "${install_packages[@]}"
+  else
+    echo "Unsupported package manager. Please install ${install_packages[*]} manually." >&2
+    exit 1
+  fi
+fi
+
 # Ensure Redis is running for Celery
 if command -v redis-cli >/dev/null 2>&1; then
   if ! redis-cli ping >/dev/null 2>&1; then
@@ -10,7 +37,7 @@ if command -v redis-cli >/dev/null 2>&1; then
     sleep 1
   fi
 else
-  echo "Redis is required but not installed. Please install redis-server." >&2
+  echo "Redis is required but redis-cli is missing even after install attempt." >&2
   exit 1
 fi
 
