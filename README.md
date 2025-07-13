@@ -90,15 +90,14 @@ Browse to http://localhost:5174 to access the React-based dashboard. The dashboa
 cd web && npm install && npm run dev
 ```
 Ensure you have Node.js and npm installed. The `start_all.sh` script will
-automatically install these dependencies if `node_modules` is missing.
+automatically pull the latest code, install missing dependencies (including
+Redis), and bootstrap the frontend if `node_modules` is missing.
 
 ### Redis Requirement
 
-Celery relies on Redis as its message broker and result backend. Make sure a
-`redis-server` is installed and running on `localhost:6379` before starting the
-API or worker processes. The `start_all.sh` script will try to launch Redis
-automatically if the command is available. On Ubuntu you can install it via
-`sudo apt-get install redis-server`; on macOS use `brew install redis`.
+Celery relies on Redis as its message broker and result backend. The startup
+script now checks for `redis-server` and installs it using `apt-get` or `brew`
+if necessary, then launches the service automatically.
 
 ### Unified Startup Script
 
